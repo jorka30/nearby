@@ -42,6 +42,7 @@ cc_library(
     ],
     hdrs = [
         "broadcast_options.h",
+        "data_element.h",
         "device_motion.h",
         "discovery_filter.h",
         "discovery_options.h",
@@ -65,6 +66,19 @@ cc_library(
 )
 
 cc_library(
+    name = "broadcast_request",
+    srcs = ["broadcast_request.cc"],
+    hdrs = ["broadcast_request.h"],
+    deps = [
+        ":encryption",
+        ":types",
+        "//internal/platform:logging",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:variant",
+    ],
+)
+
+cc_library(
     name = "encryption",
     srcs = ["encryption.cc"],
     hdrs = ["encryption.h"],
@@ -80,12 +94,51 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "intent_factory",
+    srcs = ["intent_factory.cc"],
+    hdrs = ["intent_factory.h"],
+    deps = [
+        ":broadcast_request",
+        ":types",
+        "//internal/platform:logging",
+    ],
+)
+
+cc_test(
+    name = "broadcast_request_test",
+    size = "small",
+    srcs = ["broadcast_request_test.cc"],
+    deps = [
+        ":broadcast_request",
+        "//internal/platform/implementation/g3",  # build_cleaner: keep
+        "@com_github_protobuf_matchers//protobuf-matchers",
+        "@com_google_absl//absl/types:variant",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
 cc_test(
     name = "encryption_test",
     size = "small",
     srcs = ["encryption_test.cc"],
     deps = [
         ":encryption",
+        "//internal/platform/implementation/g3",  # build_cleaner: keep
+        "@com_github_protobuf_matchers//protobuf-matchers",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "intent_factory_test",
+    size = "small",
+    srcs = ["intent_factory_test.cc"],
+    deps = [
+        ":broadcast_request",
+        ":intent_factory",
+        ":types",
         "//internal/platform/implementation/g3",  # build_cleaner: keep
         "@com_github_protobuf_matchers//protobuf-matchers",
         "@com_google_absl//absl/strings",
