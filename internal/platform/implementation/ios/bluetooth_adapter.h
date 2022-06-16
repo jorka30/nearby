@@ -19,6 +19,7 @@
 
 #include "internal/platform/implementation/ble_v2.h"
 #include "internal/platform/implementation/bluetooth_adapter.h"
+#import "internal/platform/implementation/ios/Mediums/Ble/GNCMBleCentral.h"
 
 namespace location {
 namespace nearby {
@@ -32,8 +33,17 @@ class BlePeripheral : public api::ble_v2::BlePeripheral {
   std::string GetAddress() const override;
 
   std::string GetPeripheralId() const { return peripheral_id_; }
+
   void SetPeripheralId(const std::string& peripheral_id) {
     peripheral_id_ = peripheral_id;
+  }
+
+  void SetConnectionRequester(GNCMBleConnectionRequester connection_requester) {
+    connection_requester_ = connection_requester;
+  }
+
+  GNCMBleConnectionRequester GetConnectionRequester() {
+    return connection_requester_;
   }
 
  private:
@@ -44,6 +54,7 @@ class BlePeripheral : public api::ble_v2::BlePeripheral {
 
   BluetoothAdapter& adapter_;
   std::string peripheral_id_;
+  GNCMBleConnectionRequester connection_requester_;
 };
 
 // Concrete BluetoothAdapter implementation.

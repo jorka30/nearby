@@ -14,6 +14,8 @@
 
 #import <Foundation/Foundation.h>
 
+#import "internal/platform/implementation/ios/Mediums/GNCMConnection.h"
+
 @class CBUUID;
 
 NS_ASSUME_NONNULL_BEGIN
@@ -36,6 +38,19 @@ typedef void (^GNCMGATTDiscoverResultHandler)(
     NSDictionary<CBUUID *, NSData *> *_Nullable characteristicValues);
 
 /**
+ * This handler is called by a discovering endpoint to request a connection with an an advertising
+ * endpoint.
+ */
+typedef void (^GNCMBleConnectionRequester)(NSString *serviceID,
+                                           GNCMConnectionHandler connectionHandler);
+
+/**
+ * This handler is called on a discoverer when a nearby advertising endpoint is discovered.
+ * Call |requestConnection| to request a connection with the advertiser.
+ */
+typedef void (^GNCMBleRequestConnectionHandler)(GNCMBleConnectionRequester requestConnection);
+
+/**
  * GNCMBleCentral discovers devices advertising the specified service UUID via BLE (using the
  * GNCMBlePeripheral class) and calls the specififed scanning result handler when one is found.
  *
@@ -45,7 +60,7 @@ typedef void (^GNCMGATTDiscoverResultHandler)(
  */
 @interface GNCMBleCentral : NSObject
 
-- (instancetype)init;
+- (instancetype)init NS_DESIGNATED_INITIALIZER;
 
 /**
  * Starts scanning with service UUID.
@@ -53,15 +68,20 @@ typedef void (^GNCMGATTDiscoverResultHandler)(
  * @param serviceUUID A string that uniquely identifies the scanning services to search for.
  * @param scanResultHandler The handler that is called when an endpoint advertising the service
  *                          UUID is discovered.
+ * @param requestConnectionHandler The handler that is called when an endpoint is discovered.
+ * @param callbackQueue The queue on which all callbacks are made.
  */
 - (BOOL)startScanningWithServiceUUID:(NSString *)serviceUUID
-                   scanResultHandler:(GNCMScanResultHandler)scanResultHandler;
+                   scanResultHandler:(GNCMScanResultHandler)scanResultHandler
+            requestConnectionHandler:(GNCMBleRequestConnectionHandler)requestConnectionHandler
+                       callbackQueue:(nullable dispatch_queue_t)callbackQueue;
 
 /**
  * Sets up a GATT connection.
  *
  * @param peripheralID A string that uniquely identifies the peripheral.
- * @param gattConnectionResultHandler The handler that is called when an endpoint is connected.
+ * @param gattConnectionResultHandler The handler that is called when an endpoint is
+ * connected.
  */
 - (void)connectGattServerWithPeripheralID:(NSString *)peripheralID
               gattConnectionResultHandler:
